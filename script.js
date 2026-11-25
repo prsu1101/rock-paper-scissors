@@ -10,86 +10,123 @@ function getComputerChoice() {
     }
 }
 
-//get human choice
-function getHumanChoice() {
-    let input = prompt("Choose Rock, Paper, or Scissors");
-    return input;
-}
-
 // variable to keep score
 let humanScore = 0;
 let computerScore = 0;
 
-// create variables
-let humanSelection;
-let computerSelection;
-
-//function to initiate random computer choice and get human input and assign it to created variable in line 24 and 25
-function getSelection() {
-    humanSelection = getHumanChoice();
-    computerSelection = getComputerChoice();
-}
-
 
 //one round of game 
-function playRound(humanChoice, computerChoice){
-    getSelection();
+function playRound(humanChoice) {
+    // ends the round when either score reaches 5 
+    if (humanScore === 5 || computerScore === 5) {
+        return;
+    }
 
     // changes computer entry to all lowercase to make it case insensitive when used for condition check
-    computerChoice = computerSelection.toLowerCase(); 
+    const computerChoice = getComputerChoice().toLowerCase(); 
     console.log("Computer chose: ", computerChoice);
 
     // changes human entry to all lower case to make it case insensitive when used fo condition check
-    humanChoice = humanSelection.toLowerCase();
+    humanChoice = humanChoice.toLowerCase();
     console.log("You chose: ", humanChoice);
 
+    let roundMessage = "";
+
     //game rules
-   if (humanChoice === computerChoice) { // condition tie
-    console.log("That was a close one. Its a tie.");
-
-   }else if (humanChoice === "rock") {  // condition if user chooses rock
-        if (computerChoice === "paper"){  // user chose rock && computer chose paper
-            console.log("You lose, Paper beats Rock."); // Lose condition
-            computerScore++;  // score increases for computer by 1
-        }else if (computerChoice === "scissors"){    // user chose rock && computer chose scissors
-            console.log("You win, Rock beats Scissors");  // Win condition
-            humanScore++;  // score increases for human by 1
+    if (humanChoice === computerChoice) { // condition tie
+    roundMessage = "That was a close one. Its a tie.";
+    }else if (humanChoice === "rock") {  // condition if user chooses rock
+        if (computerChoice === "paper"){  
+            roundMessage = "You lose, Paper beats Rock."; 
+            computerScore++;  
+        }else if (computerChoice === "scissors"){    
+            roundMessage = "You win, Rock beats Scissors";  
+            humanScore++;  
+        }
+    }else if (humanChoice === "paper") { // condition if user chooses paper
+        if (computerChoice === "rock") {  
+            roundMessage = "You win, Paper beats Rock.";  
+            humanScore++;  
+        }else if (computerChoice === "scissors") {  
+            roundMessage = "You lose, Scissors beat paper";   
+            computerScore++;  
+        }
+    }else if (humanChoice === "scissors") { // condition if user chooses scissors
+        if (computerChoice === "paper") {  
+            roundMessage = "You win, Scissors beat Paper.";  
+            humanScore++;  
+        } else if (computerChoice === "rock") {  
+            roundMessage = "You lose, Rock Beats Scissors";  
+            computerScore++;  
         }
 
-   }else if (humanChoice === "paper") { // condition if user chooses paper
-        if (computerChoice === "rock") {  // user chose paper && computer chose rock
-            console.log("You win, Paper beats Rock.");  //Win condition
-            humanScore++;  // score increases for human by 1
-        }else if (computerChoice === "scissors") {  // user chose paper && computer chose scissors
-            console.log("You lose, Scissors beat paper");  // Lose condition 
-            computerScore++;  // score increases for computer by 1
-        }
-
-   }else if (humanChoice === "scissors") { // condition if user chooses scissors
-        if (computerChoice === "paper") {  // condition user chose scissors && computer chose paper
-            console.log("you win, Scissors beat Paper.");  // Win condition
-            humanScore++;  // score increases for human by 1
-        } else if (computerChoice === "rock") {  // condition user chose scissors && computer chose rock
-            console.log("You lose, Rock Beats Scissors");  // lose condition 
-            computerScore++;  // score increases for computer by 1
-        }
-
-   }else {  //if any other choices are made it counts it as a loss
-    console.log("invalid choice, you lose.")
-    computerScore++;
-    return; 
-   }
-}
-
-
-// multiple rounds 
-function playGame() { // runs the play round 5 times
-    for (let i = 0; i < 5; i++){
-        playRound(humanSelection, computerSelection);  // runs teh function to play 1 round of the game
-        console.log("human: ", humanScore);  // displays current aggregated score for user
-        console.log("computer: ", computerScore);  // displays current aggregated score for computer
     }
+
+   updateDisplay(humanChoice, computerChoice, roundMessage);  // local variable from playRound available to display
 }
 
-playGame() // starts the game
+
+const rockBtn = document.querySelector("#rock"); // user choice button rock
+rockBtn.addEventListener("click", () => {
+    playRound("rock");
+});
+
+const paperBtn = document.querySelector("#paper"); // user choice button paper
+paperBtn.addEventListener("click", () => {
+    playRound("paper");
+})
+
+const scissorsBtn = document.querySelector("#scissors");  // user choice button scissor
+scissorsBtn.addEventListener("click", () => {
+    playRound("scissors");
+})
+
+const againBtn = document.createElement("button"); // restart game button
+againBtn.textContent = "Play Again";
+againBtn.style.display = "none"; // hide the button initially 
+document.body.appendChild(againBtn);
+
+againBtn.addEventListener("click", () => {
+    humanScore = 0;
+    computerScore = 0;
+    resultsDiv.textContent = "New round has begun!"
+    disableButton(false)
+    againBtn.style.display = "none";
+});
+
+function disableButton(isDisabled) { // disable choices buttons
+    rockBtn.disabled = isDisabled;
+    paperBtn.disabled = isDisabled;
+    scissorsBtn.disabled = isDisabled;
+}
+
+const resultsDiv = document.querySelector("#results");
+
+function updateDisplay(humanChoice, computerChoice, roundMessage) { // creates 3 text and appends to div below buttons 
+    resultsDiv.textContent = "";
+
+    const choicesText = document.createElement("p");  // displays the exact choices
+    choicesText.textContent = `You chose: ${humanChoice} & Computer chose: ${computerChoice}`;
+
+    const outcomeText = document.createElement ("p");  // displays exact result
+    outcomeText.textContent = roundMessage
+
+    const scoreText = document.createElement("p");  // displays running count
+    scoreText.textContent = `human: ${humanScore} | Computer: ${computerScore}`;
+
+    const winnerText = document.createElement ("p");
+    if (humanScore === 5) {
+        winnerText.textContent = "Congratulations!!! You have won the game by winning a total of 5 rounds."
+        againBtn.style.display = "inline-block"; // display play again 
+        disableButton(true);
+
+    } else if (computerScore === 5) {
+        winnerText.textContent = "You have lost 5 rounds. you lost the game."
+        againBtn.style.display = "inline-block"; 
+        disableButton(true);
+
+    }
+
+    resultsDiv.append(choicesText, outcomeText, scoreText, winnerText);
+}
 
